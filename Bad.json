@@ -1,0 +1,726 @@
+[
+    {
+        "id": "bd653c36.8cc1a8",
+        "type": "tab",
+        "label": "Bad",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "43cfc673.ff8bc8",
+        "type": "inject",
+        "z": "bd653c36.8cc1a8",
+        "name": "Licences",
+        "topic": "",
+        "payload": "[\"06949865\", \"06952355\"]",
+        "payloadType": "json",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 109,
+        "y": 58,
+        "wires": [
+            [
+                "be80d402.4fecb"
+            ]
+        ]
+    },
+    {
+        "id": "c21cfc33.2d814",
+        "type": "http request",
+        "z": "bd653c36.8cc1a8",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "url": "https://poona.ffbad.org/page.php?P=fo/menu/public/accueil/classement_hebdo",
+        "tls": "",
+        "x": 171,
+        "y": 308,
+        "wires": [
+            [
+                "2d20b303.f73a44",
+                "ec04719d.1fb77",
+                "74f39f27.371ee"
+            ]
+        ]
+    },
+    {
+        "id": "be80d402.4fecb",
+        "type": "Serial Iterator",
+        "z": "bd653c36.8cc1a8",
+        "name": "Foreach Licence",
+        "property": "payload",
+        "inputFlow": "feedback",
+        "saveOutput": 1,
+        "recursive": 0,
+        "storeId": 0,
+        "x": 709.5,
+        "y": 56,
+        "wires": [
+            [
+                "90097890.794dc",
+                "a82e3dfa.49dac8"
+            ],
+            [
+                "9e918e54.1afd3",
+                "98ae28b2.3eac58"
+            ]
+        ]
+    },
+    {
+        "id": "90097890.794dc",
+        "type": "function",
+        "z": "bd653c36.8cc1a8",
+        "name": "Data to POST",
+        "func": "var licence = msg.payload;\n\nmsg.payload = { \n    Action: \"consultation_joueur_rechercher\", \n    recherche_text_licence: licence,\n    requestForm: \"formRechercher\",\n    recherche_select_classementHebdo: global.get(\"date\")\n};\nmsg.headers = {'content-type':'application/x-www-form-urlencoded'};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 182,
+        "y": 268,
+        "wires": [
+            [
+                "c21cfc33.2d814"
+            ]
+        ]
+    },
+    {
+        "id": "ec04719d.1fb77",
+        "type": "html",
+        "z": "bd653c36.8cc1a8",
+        "name": "Extract Name",
+        "property": "payload",
+        "outproperty": "payload",
+        "tag": "div[class=blocNom]",
+        "ret": "html",
+        "as": "single",
+        "x": 446.5,
+        "y": 307,
+        "wires": [
+            [
+                "dc4dd953.b2805"
+            ]
+        ]
+    },
+    {
+        "id": "2d20b303.f73a44",
+        "type": "html",
+        "z": "bd653c36.8cc1a8",
+        "name": "Extract Ranking",
+        "property": "payload",
+        "outproperty": "payload",
+        "tag": "div[class=titre][style=\"text-align:center;\"]",
+        "ret": "text",
+        "as": "single",
+        "x": 459,
+        "y": 401,
+        "wires": [
+            [
+                "6dbc6259.f099e4"
+            ]
+        ]
+    },
+    {
+        "id": "6dbc6259.f099e4",
+        "type": "change",
+        "z": "bd653c36.8cc1a8",
+        "name": "",
+        "rules": [
+            {
+                "t": "change",
+                "p": "payload[0]",
+                "pt": "msg",
+                "from": "\\s*([A-Z]+[0-9]*)\\s*\\/\\s*([A-Z]+[0-9]*)\\s*\\/\\s*([A-Z]+[0-9]*)\\s*",
+                "fromt": "re",
+                "to": "{\"s\":\"$1\",\"d\":\"$2\",\"m\":\"$3\"}",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 485,
+        "y": 440,
+        "wires": [
+            [
+                "4f66e84a.9f779"
+            ]
+        ]
+    },
+    {
+        "id": "ab62b2cd.4eb8b8",
+        "type": "join",
+        "z": "bd653c36.8cc1a8",
+        "name": "",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "",
+        "count": "3",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1040,
+        "y": 304,
+        "wires": [
+            [
+                "be80d402.4fecb"
+            ]
+        ]
+    },
+    {
+        "id": "4f66e84a.9f779",
+        "type": "json",
+        "z": "bd653c36.8cc1a8",
+        "name": "Convert ranking in JSON",
+        "property": "payload[0]",
+        "action": "obj",
+        "pretty": false,
+        "x": 485,
+        "y": 478,
+        "wires": [
+            [
+                "6ff50a67.df2774"
+            ]
+        ]
+    },
+    {
+        "id": "6ff50a67.df2774",
+        "type": "function",
+        "z": "bd653c36.8cc1a8",
+        "name": "Format JSON ranking",
+        "func": "return {\n    payload: msg.payload[0],\n    topic: \"ranking\"\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 717,
+        "y": 478,
+        "wires": [
+            [
+                "ab62b2cd.4eb8b8"
+            ]
+        ]
+    },
+    {
+        "id": "9e918e54.1afd3",
+        "type": "debug",
+        "z": "bd653c36.8cc1a8",
+        "name": "Final Result",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 1136,
+        "y": 124,
+        "wires": []
+    },
+    {
+        "id": "2a96584d.d76eb8",
+        "type": "function",
+        "z": "bd653c36.8cc1a8",
+        "name": "Format licences",
+        "func": "return {\n    payload: global.get(\"licences\").split(\",\")\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 412,
+        "y": 110,
+        "wires": [
+            [
+                "be80d402.4fecb"
+            ]
+        ]
+    },
+    {
+        "id": "dc4dd953.b2805",
+        "type": "function",
+        "z": "bd653c36.8cc1a8",
+        "name": "Format JSON Name",
+        "func": "return {\n    payload: msg.payload[0],\n    topic: \"name\"\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 717,
+        "y": 307,
+        "wires": [
+            [
+                "ab62b2cd.4eb8b8"
+            ]
+        ]
+    },
+    {
+        "id": "98ae28b2.3eac58",
+        "type": "ui_text",
+        "z": "bd653c36.8cc1a8",
+        "group": "e4c2b501.945828",
+        "order": 4,
+        "width": "12",
+        "height": "5",
+        "name": "",
+        "label": "Result",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 1117,
+        "y": 164,
+        "wires": []
+    },
+    {
+        "id": "74f39f27.371ee",
+        "type": "html",
+        "z": "bd653c36.8cc1a8",
+        "name": "Extract Id",
+        "property": "payload",
+        "outproperty": "payload",
+        "tag": "input[name=recherche_text_licence]",
+        "ret": "attr",
+        "as": "single",
+        "x": 433,
+        "y": 609,
+        "wires": [
+            [
+                "60f959d1.a9bef"
+            ]
+        ]
+    },
+    {
+        "id": "60f959d1.a9bef",
+        "type": "function",
+        "z": "bd653c36.8cc1a8",
+        "name": "Format JSON licence",
+        "func": "return {\n    payload: msg.payload[0].value,\n    topic: \"licence\"\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 714,
+        "y": 609,
+        "wires": [
+            [
+                "ab62b2cd.4eb8b8"
+            ]
+        ]
+    },
+    {
+        "id": "7a8909cc.ab5ae",
+        "type": "debug",
+        "z": "bd653c36.8cc1a8",
+        "name": "Input",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 822,
+        "y": 747,
+        "wires": []
+    },
+    {
+        "id": "c0b12062.fac0f",
+        "type": "function",
+        "z": "bd653c36.8cc1a8",
+        "name": "Store data",
+        "func": "global.set(msg.topic, msg.payload);\n\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 646,
+        "y": 747,
+        "wires": [
+            [
+                "7a8909cc.ab5ae"
+            ]
+        ]
+    },
+    {
+        "id": "97375aba.60daf",
+        "type": "ui_text_input",
+        "z": "bd653c36.8cc1a8",
+        "name": "Licences",
+        "label": "Licences",
+        "tooltip": "",
+        "group": "e4c2b501.945828",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "mode": "text",
+        "delay": 300,
+        "topic": "licences",
+        "x": 467,
+        "y": 702,
+        "wires": [
+            [
+                "c0b12062.fac0f"
+            ]
+        ]
+    },
+    {
+        "id": "36c7734a.07b2cc",
+        "type": "ui_button",
+        "z": "bd653c36.8cc1a8",
+        "name": "Search",
+        "group": "e4c2b501.945828",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Search",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "",
+        "x": 101,
+        "y": 109,
+        "wires": [
+            [
+                "2a96584d.d76eb8"
+            ]
+        ]
+    },
+    {
+        "id": "a82e3dfa.49dac8",
+        "type": "debug",
+        "z": "bd653c36.8cc1a8",
+        "name": "Licence checked",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 1153,
+        "y": 32,
+        "wires": []
+    },
+    {
+        "id": "b570a7d1.e0b968",
+        "type": "inject",
+        "z": "bd653c36.8cc1a8",
+        "name": "",
+        "topic": "At Start",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "x": 254,
+        "y": 753,
+        "wires": [
+            [
+                "7065ed4f.323ad4"
+            ]
+        ]
+    },
+    {
+        "id": "7065ed4f.323ad4",
+        "type": "function",
+        "z": "bd653c36.8cc1a8",
+        "name": "Get Week number",
+        "func": "var d1 = new Date(\"2018-09-06\");\nvar d2 = new Date();\n\nvar WNbJours = d2.getTime() - d1.getTime();\nmsg.payload = Math.ceil(WNbJours/(1000*60*60*24) / 7);\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 254,
+        "y": 791,
+        "wires": [
+            [
+                "c3b13ec1.344998"
+            ]
+        ]
+    },
+    {
+        "id": "c3b13ec1.344998",
+        "type": "ui_dropdown",
+        "z": "bd653c36.8cc1a8",
+        "name": "Date",
+        "label": "Date",
+        "tooltip": "",
+        "place": "Select Date",
+        "group": "e4c2b501.945828",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "options": [
+            {
+                "label": "2018-09-06",
+                "value": "1",
+                "type": "str"
+            },
+            {
+                "label": "2018-9-13",
+                "value": "2",
+                "type": "str"
+            },
+            {
+                "label": "2018-9-20",
+                "value": "3",
+                "type": "str"
+            },
+            {
+                "label": "2018-9-27",
+                "value": "4",
+                "type": "str"
+            },
+            {
+                "label": "2018-10-4",
+                "value": "5",
+                "type": "str"
+            },
+            {
+                "label": "2018-10-11",
+                "value": "6",
+                "type": "str"
+            },
+            {
+                "label": "2018-10-18",
+                "value": "7",
+                "type": "str"
+            },
+            {
+                "label": "2018-10-25",
+                "value": "8",
+                "type": "str"
+            },
+            {
+                "label": "2018-11-1",
+                "value": "9",
+                "type": "str"
+            },
+            {
+                "label": "2018-11-8",
+                "value": "10",
+                "type": "str"
+            },
+            {
+                "label": "2018-11-15",
+                "value": "11",
+                "type": "str"
+            },
+            {
+                "label": "2018-11-22",
+                "value": "12",
+                "type": "str"
+            },
+            {
+                "label": "2018-11-29",
+                "value": "13",
+                "type": "str"
+            },
+            {
+                "label": "2018-12-6",
+                "value": "14",
+                "type": "str"
+            },
+            {
+                "label": "2018-12-13",
+                "value": "15",
+                "type": "str"
+            },
+            {
+                "label": "2018-12-20",
+                "value": "16",
+                "type": "str"
+            },
+            {
+                "label": "2018-12-27",
+                "value": "17",
+                "type": "str"
+            },
+            {
+                "label": "2019-1-3",
+                "value": "18",
+                "type": "str"
+            },
+            {
+                "label": "2019-1-10",
+                "value": "19",
+                "type": "str"
+            },
+            {
+                "label": "2019-1-17",
+                "value": "20",
+                "type": "str"
+            },
+            {
+                "label": "2019-1-24",
+                "value": "21",
+                "type": "str"
+            },
+            {
+                "label": "2019-1-31",
+                "value": "22",
+                "type": "str"
+            },
+            {
+                "label": "2019-2-7",
+                "value": "23",
+                "type": "str"
+            },
+            {
+                "label": "2019-2-14",
+                "value": "24",
+                "type": "str"
+            },
+            {
+                "label": "2019-2-21",
+                "value": "25",
+                "type": "str"
+            },
+            {
+                "label": "2019-2-28",
+                "value": "26",
+                "type": "str"
+            },
+            {
+                "label": "2019-3-7",
+                "value": "27",
+                "type": "str"
+            },
+            {
+                "label": "2019-3-14",
+                "value": "28",
+                "type": "str"
+            },
+            {
+                "label": "2019-3-21",
+                "value": "29",
+                "type": "str"
+            },
+            {
+                "label": "2019-3-28",
+                "value": "30",
+                "type": "str"
+            },
+            {
+                "label": "2019-4-4",
+                "value": "31",
+                "type": "str"
+            },
+            {
+                "label": "2019-4-11",
+                "value": "32",
+                "type": "str"
+            },
+            {
+                "label": "2019-4-18",
+                "value": "33",
+                "type": "str"
+            },
+            {
+                "label": "2019-4-25",
+                "value": "34",
+                "type": "str"
+            },
+            {
+                "label": "2019-5-2",
+                "value": "35",
+                "type": "str"
+            },
+            {
+                "label": "2019-5-9",
+                "value": "36",
+                "type": "str"
+            },
+            {
+                "label": "2019-5-16",
+                "value": "37",
+                "type": "str"
+            },
+            {
+                "label": "2019-5-23",
+                "value": "38",
+                "type": "str"
+            },
+            {
+                "label": "2019-5-30",
+                "value": "39",
+                "type": "str"
+            },
+            {
+                "label": "2019-6-6",
+                "value": "40",
+                "type": "str"
+            },
+            {
+                "label": "2019-6-13",
+                "value": "41",
+                "type": "str"
+            },
+            {
+                "label": "2019-6-20",
+                "value": "42",
+                "type": "str"
+            },
+            {
+                "label": "2019-6-27",
+                "value": "43",
+                "type": "str"
+            },
+            {
+                "label": "2019-7-4",
+                "value": "44",
+                "type": "str"
+            },
+            {
+                "label": "2019-7-11",
+                "value": "45",
+                "type": "str"
+            },
+            {
+                "label": "2019-7-18",
+                "value": "46",
+                "type": "str"
+            },
+            {
+                "label": "2019-7-25",
+                "value": "47",
+                "type": "str"
+            },
+            {
+                "label": "2019-8-1",
+                "value": "48",
+                "type": "str"
+            },
+            {
+                "label": "2019-8-8",
+                "value": "49",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "date",
+        "x": 466,
+        "y": 790,
+        "wires": [
+            [
+                "c0b12062.fac0f"
+            ]
+        ]
+    },
+    {
+        "id": "e4c2b501.945828",
+        "type": "ui_group",
+        "z": "",
+        "name": "Input",
+        "tab": "ff5b7bd4.bbd2b8",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "ff5b7bd4.bbd2b8",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Bad Player Requester",
+        "icon": "fa-fire",
+        "order": 1
+    }
+]
